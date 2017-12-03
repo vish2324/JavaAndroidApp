@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="Map Type">
+        <ListPreference
+            android:title="Type of Map to display"
+            android:summary="%s"
+            android:key="mapTypeKey"
+            android:defaultValue="Normal"
+            android:entries="@array/Type_entries"
+            android:entryValues="@array/Type_entries"
+            android:persistent="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Map Style">
+        <CheckBoxPreference
+            android:id="@+id/nightMode"
+            android:dependency="@string/mapTypeKey"
+            android:defaultValue="false"
+            android:key="@string/nightKey"
+            android:summaryOff="Check this to get into the nightlife mood!"
+            android:summaryOn="Have a great night! Stay safe!"
+            android:title="Night mode" >
+        </CheckBoxPreference>
+    </PreferenceCategory>
+
+</PreferenceScreen>

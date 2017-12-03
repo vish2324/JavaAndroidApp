@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/location_inp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/find_button"
+            android:layout_toStartOf="@+id/find_button"
+            android:layout_alignBottom="@+id/find_button"
+            android:hint="Enter Location" />
+
+        <Button
+            android:id="@+id/find_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:onClick="whenClick"
+            android:text="Find">
+        </Button>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <RadioGroup
+            android:id="@+id/navi_group"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignBottom="@+id/navi_button"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/navi_button"
+            android:layout_toStartOf="@+id/navi_button"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/drive"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="Drive" />
+
+            <RadioButton
+                android:id="@+id/walk"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Walk" />
+
+            <RadioButton
+                android:id="@+id/bicycle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Bicycle" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/navi_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+
+            android:text="Navigate" />
+
+    </RelativeLayout>
+
+    <!-- use your own fragment widget -->
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.example.user.wk10c32.MapsActivity" />
+
+</LinearLayout>

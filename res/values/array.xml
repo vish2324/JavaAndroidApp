@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<string-array name="Type_entries">
+    <item>Normal</item>
+    <item>Hybrid</item>
+    <item>Satellite</item>
+</string-array>
+
+</resources>
