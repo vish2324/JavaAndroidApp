@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.user.wk10c32.ActivityAbout"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <TextView
+        android:id="@+id/about_map_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/text_about_map"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:paddingRight="5dp"
+        android:paddingLeft="5dp"/>
+
+</LinearLayout>

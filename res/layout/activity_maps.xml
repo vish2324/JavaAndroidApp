@@ -11,36 +11,7 @@
         android:id="@+id/place_autocomplete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-        />
-
-    
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <EditText
-            android:id="@+id/location_inp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@+id/find_button"
-            android:layout_toStartOf="@+id/find_button"
-            android:layout_alignBottom="@+id/find_button"
-            android:hint="Enter Location" />
-
-        <Button
-            android:id="@+id/find_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:onClick="whenClick"
-            android:text="Find">
-        </Button>
-
-    </RelativeLayout>
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"/>
 
     <!-- use your own fragment widget -->
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"

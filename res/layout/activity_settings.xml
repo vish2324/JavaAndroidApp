@@ -5,4 +5,3 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:name="com.example.user.wk10c32.SettingsFragment" />
-

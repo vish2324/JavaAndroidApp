@@ -3,8 +3,6 @@ package com.example.user.wk10c32;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -12,8 +10,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
@@ -21,7 +17,6 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,8 +29,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -44,8 +37,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private Marker marker[] = new Marker[7];
     private Marker newLoc;
-    EditText place;
+
     PlaceAutocompleteFragment placeAutoComplete;
+    LatLng find;
+    LatLngBounds bound;
+
+    String address, nameLoc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +70,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onPlaceSelected(Place place) {
                 Log.d("Maps", "Place Selected: " + place.getName());
-
+                address = place.getAddress().toString();
+                nameLoc = place.getName().toString();
+                find = place.getLatLng();
+                bound = place.getViewport();
+                whenClick();
             }
 
             @Override
@@ -104,7 +105,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ++i;
         }
 
-        //update this to show central location
+        //update this to show central nameLoc
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(1.281399, 103.844268)));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
 
@@ -120,33 +121,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         changeMarkerColour(ischange);
     }
 
-
-    public void whenClick(View view){
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(this, Locale.getDefault());
-        place=findViewById(R.id.location_inp);
-        String search = place.getText().toString();
+    public void whenClick(){
         try{
-            addresses = geocoder.getFromLocationName(search,1);
-
-            double latitude = addresses.get(0).getLatitude();
-            double longitude = addresses.get(0).getLongitude();
-            LatLng loc = new LatLng(latitude,longitude);
-
+            LatLng loc = find;
             if(newLoc!=null){
                 newLoc.setVisible(false);
             }
             newLoc = mMap.addMarker(new MarkerOptions().position(loc));
             newLoc.setVisible(true);
-            newLoc.setTitle(addresses.get(0).getFeatureName());
-            newLoc.setSnippet(addresses.get(0).getAddressLine(0));
+            newLoc.setTitle(nameLoc);
+            newLoc.setSnippet(address);
             newLoc.showInfoWindow();
             newLoc.getId();
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
-            mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
-
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bound,10));
         }catch(Exception ex){
             System.out.println("Cant find");
             ex.printStackTrace();
@@ -169,7 +156,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
         if (id == R.id.map_about){
-            Intent intent = new Intent(this, AboutActivity.class);
+            Intent intent = new Intent(this,ActivityAbout.class);
             startActivity(intent);
             return true;
         }
