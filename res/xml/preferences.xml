@@ -20,8 +20,20 @@
             android:key="@string/nightKey"
             android:summaryOff="Check this to get into the nightlife mood!"
             android:summaryOn="Have a great night! Stay safe!"
-            android:title="Night mode" >
+            android:title="Night mode"
+            android:persistent="true">
         </CheckBoxPreference>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Marker Style">
+        <SwitchPreference
+            android:id="@+id/nightMark"
+            android:defaultValue="false"
+            android:key="@string/nightMarkerKey"
+            android:title="Night Marker"
+            android:summary="Choose between Normal and Night mode markers"
+            android:persistent="true">
+        </SwitchPreference>
     </PreferenceCategory>
 
 </PreferenceScreen>

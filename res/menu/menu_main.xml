@@ -2,6 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/map_settings"
         android:title="Map Settings" />
-
+    <item android:id="@+id/map_about"
+        android:title="About Map" />
 
 </menu>

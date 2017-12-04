@@ -6,11 +6,9 @@ import android.content.res.Resources;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,32 +16,42 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
 
     SharedPreferences sharedPref;
 
     private GoogleMap mMap;
-    private Marker marker;
+    private Marker marker[] = new Marker[7];
+    private Marker newLoc;
     EditText place;
-    ListPreference lp;
+    PlaceAutocompleteFragment placeAutoComplete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -51,13 +59,99 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         String nightMode = getString(R.string.nightKey);
-        boolean isnight = sharedPref.getBoolean(nightMode,false);
-        Log.d("Vishal","calling from onCreate");
+        boolean isnight = sharedPref.getBoolean(nightMode, false);
+        Log.d("Vishal", "calling from onCreate");
         changeMapStyle(isnight);
         changeMapType();
         mapStyleToast();
+
+        boolean ischange = sharedPref.getBoolean("nightMarkerKey", false);
+        changeMarkerColour(ischange);
+
+        placeAutoComplete = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete);
+        placeAutoComplete.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                Log.d("Maps", "Place Selected: " + place.getName());
+
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.d("Maps", "An error occurred: " + status);
+            }
+        });
+        placeAutoComplete.setHint("Enter Location");
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder().setTypeFilter(Place.TYPE_COUNTRY).setCountry("SG").build();
+        placeAutoComplete.setFilter(typeFilter);
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        ArrayList<LatLng> places = new ArrayList<>();
+        places.add(new LatLng(1.290602, 103.846474)); //Clarke Quay
+        places.add(new LatLng(1.284544, 103.859590)); //MBS
+        places.add(new LatLng(1.289299, 103.863137)); //Flyer
+        places.add(new LatLng(1.264282, 103.822158)); //Vivo City
+        places.add(new LatLng(1.301800, 103.837797)); //Orchard
+        places.add(new LatLng(1.255179, 103.821811)); //RWS
+
+        int i = 0;
+        for (LatLng l : places) {
+            marker[i] = mMap.addMarker(new MarkerOptions().position(l).title("Welcome to Singapore!").snippet("Hope you have a great stay!"));
+            ++i;
+        }
+
+        //update this to show central location
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(1.281399, 103.844268)));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
+
+        String nightMode = getString(R.string.nightKey);
+
+        boolean isnight = sharedPref.getBoolean(nightMode, false);
+        Log.d("Vishal", "calling from onMapReady");
+        changeMapStyle(isnight);
+        changeMapType();
+        mapStyleToast();
+
+        boolean ischange = sharedPref.getBoolean("nightMarkerKey", false);
+        changeMarkerColour(ischange);
+    }
+
+
+    public void whenClick(View view){
+        Geocoder geocoder;
+        List<Address> addresses;
+        geocoder = new Geocoder(this, Locale.getDefault());
+        place=findViewById(R.id.location_inp);
+        String search = place.getText().toString();
+        try{
+            addresses = geocoder.getFromLocationName(search,1);
+
+            double latitude = addresses.get(0).getLatitude();
+            double longitude = addresses.get(0).getLongitude();
+            LatLng loc = new LatLng(latitude,longitude);
+
+            if(newLoc!=null){
+                newLoc.setVisible(false);
+            }
+            newLoc = mMap.addMarker(new MarkerOptions().position(loc));
+            newLoc.setVisible(true);
+            newLoc.setTitle(addresses.get(0).getFeatureName());
+            newLoc.setSnippet(addresses.get(0).getAddressLine(0));
+            newLoc.showInfoWindow();
+            newLoc.getId();
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
+            mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
+
+        }catch(Exception ex){
+            System.out.println("Cant find");
+            ex.printStackTrace();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -69,9 +163,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if(id == R.id.map_settings){
             Intent intent = new Intent(this,SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        if (id == R.id.map_about){
+            Intent intent = new Intent(this, AboutActivity.class);
             startActivity(intent);
             return true;
         }
@@ -85,8 +183,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d("Vishal","calling from shared preference");
             changeMapStyle(checked);
         }
-        changeMapType();
-        mapStyleToast();
+        if(key.equals("mapTypeKey")) {
+            changeMapType();
+            mapStyleToast();
+        }
+        if (key.equals("nightMarkerKey")){
+            boolean ischange = sharedPref.getBoolean("nightMarkerKey",false);
+            changeMarkerColour(ischange);
+        }
+
     }
 
     boolean isMapNormal;
@@ -167,57 +272,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        LatLng sg = new LatLng(1.352083,103.819836);
-        marker = mMap.addMarker(new MarkerOptions().position(sg).title("Welcome to Singapore!").snippet("Hope you have a great stay!"));
-        marker.showInfoWindow();
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sg));
-        mMap.moveCamera(CameraUpdateFactory.zoomTo(10));
-
-        String nightMode = getString(R.string.nightKey);
-
-        boolean isnight = sharedPref.getBoolean(nightMode,false);
-        Log.d("Vishal","calling from onMapReady");
-        changeMapStyle(isnight);
-        changeMapType();
-        mapStyleToast();
-    }
-
-    public void whenClick(View view){
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(this, Locale.getDefault());
-
-        place=findViewById(R.id.location_inp);
-        String search = place.getText().toString();
-
-        try{
-            addresses = geocoder.getFromLocationName(search,1);
-
-            double latitude = addresses.get(0).getLatitude();
-            double longitude = addresses.get(0).getLongitude();
-            LatLng loc = new LatLng(latitude,longitude);
-
-            marker.setPosition(loc);
-            marker.setTitle(addresses.get(0).getFeatureName());
-            marker.setSnippet(addresses.get(0).getAddressLine(0));
-            marker.showInfoWindow();
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(loc));
-            mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
-
-        }catch(Exception ex){
-            System.out.println("Cant find");
-            ex.printStackTrace();
+    public void changeMarkerColour(boolean change){
+        for (Marker m : marker) {
+            if (m != null) {
+                if (change) {
+                    float colour = 120;
+                    m.setIcon(BitmapDescriptorFactory.defaultMarker(colour));
+                } else {
+                    m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                }
+            }
+        }
+        if (newLoc!= null){
+            if (change){
+                float colour = 120;
+                newLoc.setIcon(BitmapDescriptorFactory.defaultMarker(colour));
+            } else {
+                newLoc.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            }
         }
     }
 }
