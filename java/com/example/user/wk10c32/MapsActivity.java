@@ -1,8 +1,11 @@
 package com.example.user.wk10c32;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -28,9 +31,20 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener {
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import static java.lang.Thread.sleep;
+
+
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, SharedPreferences.OnSharedPreferenceChangeListener, GoogleMap.OnInfoWindowClickListener {
 
     SharedPreferences sharedPref;
 
@@ -74,7 +88,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 nameLoc = place.getName().toString();
                 find = place.getLatLng();
                 bound = place.getViewport();
-                whenClick();
+                findInput();
             }
 
             @Override
@@ -92,22 +106,48 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
         ArrayList<LatLng> places = new ArrayList<>();
-        places.add(new LatLng(1.290602, 103.846474)); //Clarke Quay
-        places.add(new LatLng(1.284544, 103.859590)); //MBS
-        places.add(new LatLng(1.289299, 103.863137)); //Flyer
-        places.add(new LatLng(1.264282, 103.822158)); //Vivo City
-        places.add(new LatLng(1.301800, 103.837797)); //Orchard
-        places.add(new LatLng(1.255179, 103.821811)); //RWS
+        ArrayList<String> placeName = new ArrayList<>();
 
-        int i = 0;
-        for (LatLng l : places) {
-            marker[i] = mMap.addMarker(new MarkerOptions().position(l).title("Welcome to Singapore!").snippet("Hope you have a great stay!"));
-            ++i;
+        places.add(new LatLng(1.290602, 103.846474)); //Clarke Quay
+        placeName.add("Clarke Quay");
+
+        places.add(new LatLng(1.284544, 103.859590)); //MBS
+        placeName.add("Marina Bay Sands");
+
+        places.add(new LatLng(1.289299, 103.863137)); //Flyer
+        placeName.add("Singapore Flyer");
+
+        places.add(new LatLng(1.264282, 103.822158)); //Vivo City
+        placeName.add("Vivo City");
+
+        places.add(new LatLng(1.301800, 103.837797)); //Orchard
+        placeName.add("Orchard Road");
+
+        places.add(new LatLng(1.255179, 103.821811)); //RWS
+        placeName.add("Resorts World Sentosa");
+
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses;
+
+        for (int i = 0; i < places.size(); i++) {
+            try {
+                System.out.println("Vishal1");
+                System.out.println(placeName.get(i));
+                System.out.println(places.get(i));
+                addresses = geocoder.getFromLocation(places.get(i).latitude, places.get(i).longitude,1);
+                String add = addresses.get(0).getAddressLine(0);
+                marker[i] = mMap.addMarker(new MarkerOptions().position(places.get(i)).title(placeName.get(i)).snippet(add));
+            } catch (IOException e) {
+                System.out.println("Vishal1 Not found");
+                e.printStackTrace();
+            }
         }
 
         //update this to show central nameLoc
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(1.281399, 103.844268)));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(13));
+
+        mMap.setOnInfoWindowClickListener(this);
 
         String nightMode = getString(R.string.nightKey);
 
@@ -121,7 +161,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         changeMarkerColour(ischange);
     }
 
-    public void whenClick(){
+
+    public String loadJSONFromAsset(Context context) {
+        String json;
+        try {
+            InputStream is = context.getAssets().open("info.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.out.println("MARKERR");
+            return null;
+        }
+        System.out.println("HEREEE"+json);
+        return json;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        try {
+            String inp = loadJSONFromAsset(this);
+            JSONObject jsonArr = new JSONObject(inp);
+            String toDis = jsonArr.getString( marker.getId() );
+            Toast toast = Toast.makeText(this,toDis,Toast.LENGTH_LONG);
+            toast.show();
+            toast.show();
+            toast.show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            System.out.println("MARKERRRR");
+        }
+    }
+
+    public void findInput(){
         try{
             LatLng loc = find;
             if(newLoc!=null){
@@ -133,7 +208,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             newLoc.setSnippet(address);
             newLoc.showInfoWindow();
             newLoc.getId();
-            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bound,10));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bound,50));
         }catch(Exception ex){
             System.out.println("Cant find");
             ex.printStackTrace();
@@ -169,6 +244,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             boolean checked = sharedPreferences.getBoolean(key,false);
             Log.d("Vishal","calling from shared preference");
             changeMapStyle(checked);
+            mapStyleToast();
         }
         if(key.equals("mapTypeKey")) {
             changeMapType();
@@ -187,7 +263,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void mapStyleToast(){
         if (isMapNight){
             if (!isMapNormal) {
-
                 Toast tst = Toast.makeText(this,"Choose Normal map to see Night Mode",Toast.LENGTH_LONG);
                 tst.show();
             }

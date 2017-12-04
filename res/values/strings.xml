@@ -9,5 +9,7 @@
 
     <string name="text_about_map"> Welcome to the Nightlife Hotspot app!\n\n
     This is an assistant that lets you navigate Singapore and it\'s Nightlife Hotspots.\n\n
-    You can look at existing locations in the app or search for your own interests.</string>
+    You can look at existing locations in the app or search for your own interests.\n\n
+    Tap on a marker to see more info. Click on the small icon at the bottom for navigation\n\n
+    Tap on the info window to get more information about the predefined locations\n\n</string>
 </resources>
